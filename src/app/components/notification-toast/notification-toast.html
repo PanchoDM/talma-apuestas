@@ -1,0 +1,19 @@
+<div class="toast-container">
+  @for (toast of svc.toasts(); track toast.id) {
+    <div class="toast" [class]="'toast--' + toast.type">
+      <span class="toast__icon">
+        @switch (toast.type) {
+          @case ('info')    { ⚽ }
+          @case ('warning') { 🔒 }
+          @case ('missed')  { 😬 }
+          @case ('score')   { 📊 }
+        }
+      </span>
+      <div class="toast__body">
+        <strong class="toast__title">{{ toast.title }}</strong>
+        <span class="toast__msg">{{ toast.message }}</span>
+      </div>
+      <button class="toast__close" (click)="svc.dismiss(toast.id)">✕</button>
+    </div>
+  }
+</div>

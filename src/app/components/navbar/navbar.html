@@ -1,0 +1,23 @@
+<nav class="navbar">
+  <div class="navbar__brand">
+    <img src="assets/logo-talma.png" alt="Talma Perú" class="navbar__logo" />
+    <span class="navbar__title">talmaFM <span class="navbar__year">2026</span></span>
+  </div>
+
+  @if (user()) {
+    <div class="navbar__links">
+      <a routerLink="/dashboard"   routerLinkActive="active">Dashboard</a>
+      <a routerLink="/leaderboard" routerLinkActive="active">Posiciones</a>
+      @if (isAdmin()) {
+        <a routerLink="/admin" routerLinkActive="active" class="admin-link">⚙ Admin</a>
+      }
+    </div>
+    <div class="navbar__user">
+      @if (!isAdmin()) {
+        <span class="points-badge">⚽ {{ user()!.puntos_totales }} pts</span>
+      }
+      <span class="username">{{ user()!.nombre_usuario }}</span>
+      <button class="btn-logout" (click)="auth.logout()">Salir</button>
+    </div>
+  }
+</nav>

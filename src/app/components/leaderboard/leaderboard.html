@@ -1,0 +1,85 @@
+<app-navbar />
+
+<main class="lb-page">
+  <!-- Hero -->
+  <section class="lb-hero">
+    <div class="lb-hero__content">
+      <h1>Tabla de <span>Posiciones</span></h1>
+      <p>Mundial 2026 · Los mejores apostadores de Talma</p>
+    </div>
+  </section>
+
+  <div class="lb-container">
+
+    <!-- Mi posición (si es usuario normal) -->
+    @if (myEntry()) {
+      <div class="my-position-card">
+        <span class="my-pos-label">Tu posición</span>
+        <div class="my-pos-data">
+          <span class="my-pos-rank">{{ getMedalEmoji(myEntry()!.posicion) }}</span>
+          <div class="my-pos-info">
+            <strong>{{ myEntry()!.nombre_usuario }}</strong>
+            <span>Puesto #{{ myEntry()!.posicion }} · {{ myEntry()!.puntos_totales }} pts · {{ myEntry()!.aciertos_exactos }} exactos</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Tabla principal -->
+    @if (loading()) {
+      <div class="lb-loading">
+        @for (i of [1,2,3,4,5]; track i) { <div class="row-skeleton"></div> }
+      </div>
+    } @else if (entries().length === 0) {
+      <div class="lb-empty">
+        <span>⚽</span>
+        <p>Aún no hay apostadores registrados. ¡Sé el primero!</p>
+      </div>
+    } @else {
+      <div class="lb-table-wrap">
+        <table class="lb-table">
+          <thead>
+            <tr>
+              <th class="col-pos">Pos.</th>
+              <th class="col-user">Apostador</th>
+              <th class="col-pts">Puntos</th>
+              <th class="col-exact">Exactos ⭐</th>
+              <th class="col-bar">Rendimiento</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of entries(); track entry.nombre_usuario) {
+              <tr [class.is-me]="isCurrentUser(entry.nombre_usuario)" [class.top3]="entry.posicion <= 3">
+                <td class="col-pos">
+                  <span class="rank-badge" [class]="'rank-' + entry.posicion">
+                    {{ getMedalEmoji(entry.posicion) }}
+                  </span>
+                </td>
+                <td class="col-user">
+                  <span class="username">{{ entry.nombre_usuario }}</span>
+                  @if (isCurrentUser(entry.nombre_usuario)) {
+                    <span class="you-tag">Tú</span>
+                  }
+                </td>
+                <td class="col-pts">
+                  <strong>{{ entry.puntos_totales }}</strong>
+                  <span class="pts-unit"> pts</span>
+                </td>
+                <td class="col-exact">{{ entry.aciertos_exactos }}</td>
+                <td class="col-bar">
+                  <div class="progress-bar">
+                    <div class="progress-fill"
+                         [style.width.%]="entries()[0].puntos_totales > 0
+                           ? (entry.puntos_totales / entries()[0].puntos_totales) * 100
+                           : 0">
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</main>

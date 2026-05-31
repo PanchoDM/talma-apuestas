@@ -1,0 +1,117 @@
+/* TalmaFM 2026 — Estilos Globales */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #0a0a0a;
+  color: #dee2e6;
+  -webkit-font-smoothing: antialiased;
+}
+
+// ── Auth pages (login / register) ───────────────────────────────────────────
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.92) 100%),
+    url('https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/MetLife_Stadium_Aerial_2014.jpg/1280px-MetLife_Stadium_Aerial_2014.jpg')
+    center / cover no-repeat fixed;
+  padding: 2rem;
+}
+
+.auth-card {
+  background: linear-gradient(135deg, #161625, #1e1e35);
+  border: 1px solid rgba(230,57,70,0.3);
+  border-radius: 20px;
+  padding: 3rem 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+
+  &__header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin: 0.75rem 0 0.3rem;
+
+    span { color: #e63946; }
+  }
+
+  p { color: #6c757d; font-size: 0.85rem; }
+}
+
+.auth-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
+
+.auth-form { display: flex; flex-direction: column; gap: 1.2rem; }
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  label { color: #adb5bd; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px; }
+
+  input {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    color: #fff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+
+    &:focus { border-color: #e63946; box-shadow: 0 0 0 3px rgba(230,57,70,0.15); }
+    &::placeholder { color: #495057; }
+  }
+}
+
+.field-error { color: #e63946; font-size: 0.75rem; }
+.error-msg   { background: rgba(230,57,70,0.1); border: 1px solid rgba(230,57,70,0.3); color: #e63946; border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.85rem; }
+.success-msg { background: rgba(40,167,69,0.1); border: 1px solid rgba(40,167,69,0.3); color: #28a745; border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.85rem; }
+
+.btn-primary {
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, #e63946, #c1121f);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(230,57,70,0.4); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #6c757d;
+  font-size: 0.85rem;
+
+  a { color: #e63946; text-decoration: none; font-weight: 600; &:hover { text-decoration: underline; } }
+}
+
+// ── Scrollbar ────────────────────────────────────────────────────────────────
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #e63946; border-radius: 3px; }
+

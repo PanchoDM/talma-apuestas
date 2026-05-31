@@ -1,0 +1,28 @@
+<div class="ac-wrap">
+  <input
+    class="ac-input"
+    type="text"
+    [value]="query"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    (input)="onInput($any($event.target).value)"
+    (keydown)="onKeydown($event)"
+    autocomplete="off"
+  />
+
+  @if (open() && suggestions().length) {
+    <ul class="ac-dropdown" role="listbox">
+      @for (country of suggestions(); track country.name; let i = $index) {
+        <li
+          class="ac-option"
+          [class.ac-option--active]="i === activeIndex"
+          role="option"
+          (mousedown)="$event.preventDefault()"
+          (click)="select(country)">
+          <span class="ac-flag">{{ country.flag }}</span>
+          <span class="ac-name">{{ country.name }}</span>
+        </li>
+      }
+    </ul>
+  }
+</div>

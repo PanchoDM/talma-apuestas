@@ -1,0 +1,14 @@
+<div class="streak-overlay" (click)="close.emit()">
+  <div class="streak-modal" [class.hot]="streak.streak === 'hot'" [class.cold]="streak.streak === 'cold'" (click)="$event.stopPropagation()">
+    <div class="streak-icon">
+      @if (streak.streak === 'hot') { 🔥🔥🔥 }
+      @if (streak.streak === 'cold') { ❄️😰❄️ }
+    </div>
+    <h2 class="streak-message">{{ streak.message }}</h2>
+    <p class="streak-subtitle">
+      @if (streak.streak === 'hot') { 3 aciertos consecutivos — ¡Eres imparable! }
+      @if (streak.streak === 'cold') { 3 pronósticos sin puntos — El próximo puede ser el bueno }
+    </p>
+    <button class="streak-close" (click)="close.emit()">Continuar</button>
+  </div>
+</div>

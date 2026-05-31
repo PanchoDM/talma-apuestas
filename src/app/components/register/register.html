@@ -1,0 +1,37 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card__header">
+      <img src="assets/logo-talma.png" alt="Talma Perú" class="auth-logo" />
+      <h1>FM <span>2026</span></h1>
+      <p>Crear cuenta nueva</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+      <div class="form-group">
+        <label>Usuario</label>
+        <input formControlName="nombre_usuario" type="text" placeholder="Mínimo 3 caracteres" />
+        @if (form.get('nombre_usuario')?.touched && form.get('nombre_usuario')?.invalid) {
+          <span class="field-error">Mínimo 3 caracteres</span>
+        }
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input formControlName="password" type="password" placeholder="Mínimo 6 caracteres" />
+        @if (form.get('password')?.touched && form.get('password')?.invalid) {
+          <span class="field-error">Mínimo 6 caracteres</span>
+        }
+      </div>
+
+      @if (error)   { <div class="error-msg">{{ error }}</div> }
+      @if (success) { <div class="success-msg">{{ success }}</div> }
+
+      <button type="submit" class="btn-primary" [disabled]="loading || form.invalid">
+        {{ loading ? 'Creando cuenta...' : 'Crear cuenta' }}
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
+    </p>
+  </div>
+</div>

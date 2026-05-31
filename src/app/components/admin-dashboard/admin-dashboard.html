@@ -1,0 +1,224 @@
+<app-navbar />
+
+<!-- Modal de resultado en tiempo real -->
+@if (selectedPartido()) {
+  <app-resultado-modal
+    [partido]="selectedPartido()!"
+    (saved)="onResultadoSaved()"
+    (cancel)="selectedPartido.set(null)" />
+}
+
+<main class="admin-page">
+  <div class="admin-header">
+    <h1>Panel de <span>Administración</span></h1>
+    <p>Gestión de partidos y control de apuestas · talmaFM 2026</p>
+  </div>
+
+  <div class="admin-restriction-notice">
+    ⚠ Como administrador, no puedes realizar predicciones. Tu rol es gestionar la plataforma.
+  </div>
+
+  <!-- ── Agregar nuevo partido ─────────────────────────────────────── -->
+  <section class="admin-section">
+    <div class="section-header">
+      <h2>Agregar Partido</h2>
+      <button class="btn-toggle-form" (click)="showForm.update(v => !v)">
+        {{ showForm() ? '✕ Cancelar' : '+ Nuevo partido' }}
+      </button>
+    </div>
+
+    @if (showForm()) {
+      <form class="partido-form" [formGroup]="form" (ngSubmit)="submitPartido()">
+        <div class="partido-form__fields">
+          <div class="form-group">
+            <label>Equipo Local</label>
+            <!-- Autocomplete con banderas -->
+            <app-country-autocomplete
+              formControlName="equipo_local"
+              placeholder="Ej: México" />
+          </div>
+
+          <div class="form-group form-group--vs">
+            <span class="vs-badge">VS</span>
+          </div>
+
+          <div class="form-group">
+            <label>Equipo Visitante</label>
+            <app-country-autocomplete
+              formControlName="equipo_visitante"
+              placeholder="Ej: Argentina" />
+          </div>
+
+          <div class="form-group form-group--date">
+            <label>Fecha y Hora</label>
+            <input formControlName="fecha_partido" type="datetime-local" />
+          </div>
+        </div>
+
+        <!-- Preview de banderas -->
+        @if (form.value.equipo_local || form.value.equipo_visitante) {
+          <div class="partido-preview">
+            <span class="preview-team">
+              <span>{{ form.value.equipo_local | flag }}</span>
+              {{ form.value.equipo_local || '—' }}
+            </span>
+            <span class="preview-vs">vs</span>
+            <span class="preview-team">
+              <span>{{ form.value.equipo_visitante | flag }}</span>
+              {{ form.value.equipo_visitante || '—' }}
+            </span>
+          </div>
+        }
+
+        @if (formError)   { <div class="error-msg">{{ formError }}</div> }
+        @if (formSuccess) { <div class="success-msg">{{ formSuccess }}</div> }
+
+        <div class="partido-form__actions">
+          <button type="submit" class="btn-create" [disabled]="saving() || form.invalid">
+            {{ saving() ? 'Creando...' : 'Crear Partido y Notificar Usuarios' }}
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+
+  <!-- ── Control de partidos ──────────────────────────────────────── -->
+  <section class="admin-section">
+    <div class="section-header">
+      <h2>Control de Partidos</h2>
+      <div class="section-header__right">
+        <button class="btn-filter" (click)="showAll.update(v => !v)">
+          @if (showAll()) {
+            Ocultar finalizados / cerrados
+          } @else {
+            Ver todos <span class="hidden-badge">{{ hiddenCount() }} ocultos</span>
+          }
+        </button>
+        <span class="total-badge">{{ partidos().length }} partidos</span>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <p class="loading-text">Cargando partidos...</p>
+    } @else {
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Partido</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Marcador MT</th>
+            <th>Apuestas</th>
+            <th>Visible</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (partido of filteredPartidos(); track partido.id) {
+            <tr>
+              <td class="id-col">{{ partido.id }}</td>
+
+              <!-- Nombres con banderas -->
+              <td class="match-col">
+                <span class="team-flag">{{ partido.equipo_local | flag }}</span>
+                <strong>{{ partido.equipo_local }}</strong>
+                <span class="vs-sep">vs</span>
+                <span class="team-flag">{{ partido.equipo_visitante | flag }}</span>
+                <strong>{{ partido.equipo_visitante }}</strong>
+              </td>
+
+              <td>{{ partido.fecha_partido | date:'d MMM, HH:mm' }}</td>
+
+              <td>
+                <span class="status-chip status-{{ partido.estado }}">
+                  {{ partido.estado }}
+                </span>
+              </td>
+
+              <td class="score-col">
+                @if (partido.goles_local_mt !== null) {
+                  {{ partido.goles_local_mt }} – {{ partido.goles_visitante_mt }}
+                } @else {
+                  <span class="no-score">–</span>
+                }
+              </td>
+
+              <td>
+                <span class="bet-status" [class.open]="partido.apuestas_abiertas">
+                  {{ partido.apuestas_abiertas ? 'ABIERTAS' : 'CERRADAS' }}
+                </span>
+              </td>
+
+              <!-- Visibilidad para usuarios -->
+              <td class="vis-col">
+                <button
+                  class="btn-vis"
+                  [class.hidden-state]="!partido.visible_usuarios"
+                  [disabled]="togglingVis() === partido.id"
+                  (click)="toggleVisibilidad(partido.id)"
+                  [title]="partido.visible_usuarios ? 'Visible para usuarios · clic para ocultar' : 'Oculto para usuarios · clic para mostrar'">
+                  @if (partido.visible_usuarios) {
+                    <!-- Ojo abierto -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  } @else {
+                    <!-- Ojo cerrado -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  }
+                </button>
+              </td>
+
+              <td class="actions-col">
+                <!-- Resultado: disponible mientras no esté finalizado -->
+                @if (partido.estado !== 'finalizado') {
+                  <button class="btn-result" (click)="openResultado(partido)" title="Registrar resultado final">
+                    🏁 Resultado
+                  </button>
+                } @else {
+                  <span class="result-locked" title="Partido finalizado · resultado bloqueado">
+                    🔒 FIN
+                  </span>
+                }
+
+                <!-- Toggle apuestas -->
+                <button
+                  class="btn-toggle"
+                  [class.closing]="partido.apuestas_abiertas"
+                  [disabled]="toggling() === partido.id"
+                  (click)="toggle(partido.id)">
+                  {{ toggling() === partido.id ? '...' : partido.apuestas_abiertas ? 'Cerrar' : 'Abrir' }}
+                </button>
+
+                <!-- Eliminar: solo si está pendiente + confirmación de 2 pasos -->
+                @if (partido.estado === 'pendiente') {
+                  @if (confirmingDelete() === partido.id) {
+                    <span class="confirm-delete">
+                      <span class="confirm-text">¿Eliminar?</span>
+                      <button class="btn-yes"
+                        [disabled]="deleting() === partido.id"
+                        (click)="eliminar(partido.id)">
+                        {{ deleting() === partido.id ? '...' : 'Sí' }}
+                      </button>
+                      <button class="btn-no" (click)="confirmingDelete.set(null)">No</button>
+                    </span>
+                  } @else {
+                    <button class="btn-delete" (click)="pedirConfirmacionEliminar(partido.id)" title="Eliminar partido">
+                      🗑
+                    </button>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+</main>

@@ -1,0 +1,222 @@
+.lb-page {
+  min-height: calc(100vh - 64px);
+  background: #0a0a0a;
+}
+
+// ── Hero ──────────────────────────────────────────────────────────────────────
+.lb-hero {
+  position: relative;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/SoFi_Stadium_-_View_from_above.jpg/1280px-SoFi_Stadium_-_View_from_above.jpg');
+  background-size: cover;
+  background-position: center 30%;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(10,10,10,0.55), rgba(10,10,10,0.9));
+  }
+
+  &__content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin: 0 0 0.4rem;
+      span { color: #ffd166; }
+    }
+
+    p { color: #adb5bd; font-size: 0.95rem; }
+  }
+}
+
+// ── Container ─────────────────────────────────────────────────────────────────
+.lb-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+// ── Mi posición ───────────────────────────────────────────────────────────────
+.my-position-card {
+  background: linear-gradient(135deg, rgba(230,57,70,0.12), rgba(230,57,70,0.05));
+  border: 1px solid rgba(230,57,70,0.35);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.my-pos-label {
+  color: #e63946;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.my-pos-data {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.my-pos-rank {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.my-pos-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  strong { color: #fff; font-size: 1rem; }
+  span   { color: #adb5bd; font-size: 0.82rem; }
+}
+
+// ── Tabla ─────────────────────────────────────────────────────────────────────
+.lb-table-wrap {
+  background: #161625;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.lb-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead tr {
+    background: #1a1a2e;
+  }
+
+  th {
+    padding: 1rem 1.2rem;
+    text-align: left;
+    color: #6c757d;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  tbody tr {
+    border-top: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+
+    &:hover    { background: rgba(255,255,255,0.03); }
+    &.is-me    { background: rgba(230,57,70,0.07); }
+    &.top3 td  { background: transparent; }
+  }
+
+  td {
+    padding: 1rem 1.2rem;
+    color: #dee2e6;
+    font-size: 0.9rem;
+    vertical-align: middle;
+  }
+}
+
+// Columnas
+.col-pos   { width: 70px; text-align: center; }
+.col-user  { }
+.col-pts   { width: 110px; text-align: right; }
+.col-exact { width: 100px; text-align: center; color: #adb5bd; }
+.col-bar   { width: 160px; }
+
+// Rank badge
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: 900;
+  background: rgba(255,255,255,0.05);
+}
+
+.rank-1 { background: rgba(255,209,0,0.15);  box-shadow: 0 0 12px rgba(255,209,0,0.3); }
+.rank-2 { background: rgba(192,192,192,0.15); }
+.rank-3 { background: rgba(205,127,50,0.15);  }
+
+// Username
+.col-user { display: flex; align-items: center; gap: 0.6rem; }
+
+.username { color: #fff; font-weight: 600; }
+
+.you-tag {
+  background: rgba(230,57,70,0.2);
+  color: #e63946;
+  border: 1px solid rgba(230,57,70,0.4);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// Pts
+.col-pts strong { color: #fff; font-size: 1.05rem; font-weight: 800; }
+.pts-unit       { color: #6c757d; font-size: 0.8rem; }
+
+// Progress bar
+.progress-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #e63946, #ffd166);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+  min-width: 2px;
+}
+
+// Empty / Loading
+.lb-empty {
+  text-align: center;
+  padding: 5rem 2rem;
+  color: #495057;
+
+  span { font-size: 3rem; display: block; margin-bottom: 1rem; }
+  p    { font-size: 0.95rem; }
+}
+
+.lb-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.row-skeleton {
+  height: 58px;
+  background: linear-gradient(90deg, #161625 25%, #1e1e35 50%, #161625 75%);
+  background-size: 400% 100%;
+  border-radius: 10px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer { 0% { background-position: 100% 0 } 100% { background-position: -100% 0 } }

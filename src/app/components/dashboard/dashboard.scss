@@ -1,0 +1,261 @@
+.dashboard {
+  min-height: calc(100vh - 64px);
+  background-color: #0a0a0a;
+
+  // ── Hero ──────────────────────────────────────────────────────────────────
+  &__hero {
+    position: relative;
+    height: 340px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    // Fondo estadio (Azteca) con marca de agua de silueta de jugador
+    background-image:
+      url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Azteca_2016.jpg/1280px-Azteca_2016.jpg');
+    background-size: cover;
+    background-position: center 40%;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0.85) 100%);
+    }
+
+    // Silueta jugador marca de agua
+    &::after {
+      content: '';
+      position: absolute;
+      right: 5%;
+      bottom: 0;
+      width: 300px;
+      height: 100%;
+      background:
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200"><ellipse cx="50" cy="15" rx="12" ry="12" fill="white"/><rect x="35" y="27" width="30" height="55" rx="5" fill="white"/><rect x="20" y="30" width="15" height="45" rx="5" fill="white"/><rect x="65" y="30" width="15" height="45" rx="5" fill="white"/><rect x="36" y="82" width="14" height="60" rx="5" fill="white"/><rect x="50" y="82" width="14" height="60" rx="5" fill="white"/></svg>')
+        no-repeat bottom center;
+      background-size: contain;
+      opacity: 0.04;
+    }
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+
+  h1 {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin: 0 0 0.5rem;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+
+    span { color: #e63946; }
+  }
+
+  p {
+    color: #adb5bd;
+    font-size: 1.1rem;
+    margin: 0 0 2rem;
+  }
+}
+
+.hero-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 2rem;
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50px;
+  padding: 1rem 2.5rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &-value {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fff;
+  }
+  &-label {
+    font-size: 0.7rem;
+    color: #adb5bd;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+}
+
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255,255,255,0.2);
+}
+
+// ── Partidos ───────────────────────────────────────────────────────────────
+.dashboard__matches {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.section-title {
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin: 0 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, #e63946, transparent);
+  }
+}
+
+.matches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.match-card {
+  background: linear-gradient(135deg, #161625, #1e1e35);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(230,57,70,0.2);
+  }
+
+  &.locked { opacity: 0.7; }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+  }
+
+  &__prediction, &__action {
+    margin-top: 1.2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    text-align: center;
+  }
+}
+
+.match-date { color: #6c757d; font-size: 0.8rem; }
+
+.badge {
+  padding: 0.25rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-pending { background: rgba(108,117,125,0.2); color: #adb5bd; }
+.badge-live    { background: rgba(230,57,70,0.2);   color: #e63946; animation: blink 1.2s infinite; }
+.badge-done    { background: rgba(40,167,69,0.2);   color: #28a745; }
+
+.match-teams {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.team-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 1;
+
+  &--right { align-items: center; }
+}
+
+.team-flag {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.team-name {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.vs-label {
+  color: #e63946;
+  font-weight: 900;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.live-score {
+  color: #ffd166;
+  font-size: 1.6rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.pred-score    { color: #adb5bd; font-size: 0.85rem; display: block; margin-bottom: 0.5rem; }
+.pred-pending  { color: #6c757d; font-size: 0.8rem; font-style: italic; }
+
+.pts-badge     { font-size: 0.85rem; font-weight: 700; padding: 0.3rem 0.8rem; border-radius: 20px; }
+.pts-exact     { background: rgba(255,209,102,0.15); color: #ffd166; }
+.pts-trend     { background: rgba(40,167,69,0.15);   color: #28a745; }
+.pts-miss      { background: rgba(108,117,125,0.15); color: #6c757d; }
+
+.btn-bet {
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #e63946, #c1121f);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+
+  &:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(230,57,70,0.4); }
+}
+
+.locked-msg { color: #6c757d; font-size: 0.85rem; }
+
+// Skeletons
+.loading-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px,1fr)); gap: 1.5rem; }
+.card-skeleton {
+  height: 200px;
+  background: linear-gradient(90deg, #161625 25%, #1e1e35 50%, #161625 75%);
+  background-size: 400% 100%;
+  border-radius: 16px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer { 0% { background-position: 100% 0 } 100% { background-position: -100% 0 } }
+@keyframes blink   { 0%,100% { opacity: 1 } 50% { opacity: 0.4 } }

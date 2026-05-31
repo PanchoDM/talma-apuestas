@@ -1,0 +1,32 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card__header">
+      <img src="assets/logo-talma.png" alt="Talma Perú" class="auth-logo" />
+      <h1>FM <span>2026</span></h1>
+      <p>Plataforma de Pronósticos · Edición Corporativa</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+      <div class="form-group">
+        <label>Usuario</label>
+        <input formControlName="nombre_usuario" type="text" placeholder="Tu nombre de usuario" autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input formControlName="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+
+      @if (error) {
+        <div class="error-msg">{{ error }}</div>
+      }
+
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        {{ loading ? 'Ingresando...' : 'Ingresar' }}
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      ¿No tienes cuenta? <a routerLink="/register">Regístrate aquí</a>
+    </p>
+  </div>
+</div>

@@ -1,0 +1,126 @@
+.pf-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 8000;
+}
+
+.pf-modal {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 2px solid #e63946;
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 90%;
+  max-width: 460px;
+  box-shadow: 0 20px 60px rgba(230,57,70,0.3);
+}
+
+.pf-title {
+  text-align: center;
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin: 0 0 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.pf-match {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  .team {
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    text-align: center;
+    flex: 1;
+  }
+
+  .vs {
+    color: #e63946;
+    font-weight: 900;
+    font-size: 1.2rem;
+  }
+}
+
+.pf-scores {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.score-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+
+  label { color: #adb5bd; font-size: 0.8rem; }
+
+  input {
+    width: 70px;
+    height: 70px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 900;
+    background: #0f0f1a;
+    border: 2px solid #e63946;
+    border-radius: 8px;
+    color: #fff;
+    outline: none;
+
+    &:focus { border-color: #ffd166; box-shadow: 0 0 10px rgba(255,209,102,0.3); }
+  }
+}
+
+.score-separator {
+  color: #adb5bd;
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+}
+
+.pf-tendency {
+  text-align: center;
+  color: #adb5bd;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+
+  strong { color: #ffd166; }
+}
+
+.pf-warning {
+  text-align: center;
+  color: #ffc107;
+  background: rgba(255,193,7,0.08);
+  border: 1px solid rgba(255,193,7,0.25);
+  border-radius: 8px;
+  padding: 0.55rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+}
+
+.pf-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 1px solid #6c757d;
+  color: #adb5bd;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  &:hover { border-color: #fff; color: #fff; }
+}

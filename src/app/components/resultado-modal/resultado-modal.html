@@ -1,0 +1,49 @@
+<div class="rm-overlay" (click)="cancel.emit()">
+  <div class="rm-modal" (click)="$event.stopPropagation()">
+
+    <div class="rm-header">
+      <h3>🏁 Registrar Resultado Final</h3>
+      <button class="rm-close" (click)="cancel.emit()">✕</button>
+    </div>
+
+    <div class="rm-match">
+      <div class="rm-team">
+        <span class="rm-flag">{{ partido.equipo_local | flag }}</span>
+        <span class="rm-team-name">{{ partido.equipo_local }}</span>
+      </div>
+      <span class="rm-vs">VS</span>
+      <div class="rm-team rm-team--right">
+        <span class="rm-flag">{{ partido.equipo_visitante | flag }}</span>
+        <span class="rm-team-name">{{ partido.equipo_visitante }}</span>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <div class="rm-scores">
+        <div class="rm-score-input">
+          <label>{{ partido.equipo_local }}</label>
+          <input formControlName="goles_local" type="number" min="0" max="20" />
+        </div>
+        <span class="rm-dash">–</span>
+        <div class="rm-score-input">
+          <label>{{ partido.equipo_visitante }}</label>
+          <input formControlName="goles_visitante" type="number" min="0" max="20" />
+        </div>
+      </div>
+
+      <div class="rm-alert rm-alert--warning">
+        El partido quedará <strong>cerrado definitivamente</strong>. Se repartirán los puntos a todos los apostadores.
+      </div>
+
+      @if (error) { <div class="rm-error">{{ error }}</div> }
+
+      <div class="rm-actions">
+        <button type="button" class="btn-cancel" (click)="cancel.emit()">Cancelar</button>
+        <button type="submit" class="btn-save" [disabled]="saving || form.invalid">
+          {{ saving ? 'Guardando...' : 'Finalizar Partido y Repartir Puntos' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

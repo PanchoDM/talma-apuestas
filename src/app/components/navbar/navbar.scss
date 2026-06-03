@@ -6,6 +6,12 @@ $accent:       #e63946;
 // ==========================================================================
 // 1. BASE / DESKTOP (Pantallas grandes)
 // ==========================================================================
+:host {
+  display: block;
+  width: 100%;
+  position: relative;
+  z-index: 1000;
+}
 .navbar {
   display: flex;
   align-items: center;

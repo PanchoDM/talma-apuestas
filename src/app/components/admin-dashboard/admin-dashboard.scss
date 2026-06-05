@@ -77,49 +77,64 @@
     border-left-color: #e63946;
   }
 
-  &--group { font-weight: 700; }
-
-  &--sub {
-    padding-left: 2rem;
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: #6c757d;
-    border-left-color: transparent;
-
-    &:hover { color: #adb5bd; }
-    &.active { color: #e63946; border-left-color: #e63946; }
-  }
 }
 
-.chevron {
-  font-size: 1rem;
-  line-height: 1;
-  display: inline-block;
-  transition: transform 0.2s;
-
-  &.rotated { transform: rotate(90deg); }
+// Lista semántica del sidebar
+.sidebar-nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.sidebar-subgroup { padding-bottom: 0.25rem; }
+// Etiqueta de sección (FASE DE GRUPOS, ELIMINACIÓN DIRECTA)
+.sidebar-nav__section {
+  color: #495057;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 1rem 1.2rem 0.35rem;
+  pointer-events: none;
+}
 
 .sidebar-overlay {
-  display: none;  // solo activo en móvil
+  display: none;
 }
 
 .btn-sidebar-toggle {
-  display: none;  // solo visible en móvil
+  display: none;
 }
 
-.ronda-badge {
-  background: rgba(230, 57, 70, 0.15);
+// Chip de filtro activo en el header de la tabla
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(230, 57, 70, 0.12);
   color: #e63946;
   border: 1px solid rgba(230, 57, 70, 0.3);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 0.2rem 0.6rem;
+  padding: 0.15rem 0.6rem;
   border-radius: 20px;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-left: 0.6rem;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+// Chip compacto de grupo en la tabla
+.grupo-chip {
+  display: inline-block;
+  background: rgba(76, 201, 240, 0.12);
+  color: #4cc9f0;
+  border: 1px solid rgba(76, 201, 240, 0.25);
+  font-size: 0.75rem;
+  font-weight: 800;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 6px;
 }
 
 // ── Contenido principal ────────────────────────────────────────────────────
@@ -244,35 +259,28 @@
   padding: 1.8rem;
   animation: fadeDown 0.25s ease;
 
-  &__fields {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr 1fr;
-    gap: 1rem;
+  &__row {
+    display: flex;
     align-items: flex-end;
+    gap: 1rem;
     margin-bottom: 1rem;
 
-    @media (max-width: 768px) {
-      grid-template-columns: 1fr;
-      .form-group--vs { display: none; }
+    // El .form-group ocupa el espacio disponible dentro del row
+    .form-group { flex: 1; min-width: 0; }
+
+    .vs-badge {
+      color: #e63946;
+      font-weight: 900;
+      font-size: 1rem;
+      padding-bottom: 0.75rem;
+      flex-shrink: 0;
     }
+
+    &--meta .form-group:first-child { flex: 2; } // fecha más ancha
   }
 
-  &__actions { text-align: right; }
+  &__footer { text-align: right; margin-top: 0.5rem; }
 }
-
-.form-group--vs {
-  display: flex;
-  align-items: flex-end;
-  padding-bottom: 0.75rem;
-}
-
-.vs-badge {
-  color: #e63946;
-  font-weight: 900;
-  font-size: 1rem;
-}
-
-.form-group--date { grid-column: span 1; }
 
 .btn-create {
   background: linear-gradient(135deg, #e63946, #c1121f);
@@ -622,3 +630,26 @@
 
 .error-msg   { background: rgba(230,57,70,0.1); border: 1px solid rgba(230,57,70,0.3); color: #e63946; border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.85rem; margin-bottom: 0.75rem; }
 .success-msg { background: rgba(40,167,69,0.1); border: 1px solid rgba(40,167,69,0.3); color: #28a745; border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.85rem; margin-bottom: 0.75rem; }
+
+// ── Select elements ────────────────────────────────────────────────────────
+.form-group select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  color-scheme: dark;
+
+  &:focus { border-color: #e63946; box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.12); }
+
+  option { background: #1a1a2e; color: #fff; }
+}
+
+// ── Columnas nuevas en la tabla ────────────────────────────────────────────
+.col-grupo   { text-align: center; }
+.col-jornada { text-align: center; color: #adb5bd; font-size: 0.82rem; }

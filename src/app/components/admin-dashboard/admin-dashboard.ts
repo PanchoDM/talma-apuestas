@@ -8,11 +8,6 @@ import { CountryAutocompleteComponent } from '../country-autocomplete/country-au
 import { ResultadoModalComponent } from '../resultado-modal/resultado-modal';
 import { FlagPipe } from '../../pipes/flag.pipe';
 
-interface FaseItem  { key: string; label: string }
-interface FaseGroup { key: string; label: string; accordion: true;  subItems: FaseItem[] }
-interface FaseLink  { key: string; label: string; accordion?: false }
-type SidebarFase = FaseGroup | FaseLink;
-
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -22,32 +17,27 @@ type SidebarFase = FaseGroup | FaseLink;
   styleUrl: './admin-dashboard.scss',
 })
 export class AdminDashboardComponent implements OnInit {
-  partidos          = signal<Partido[]>([]);
-  loading           = signal(true);
-  toggling          = signal<number | null>(null);
-  showForm          = signal(false);
-  saving            = signal(false);
-  selectedPartido   = signal<Partido | null>(null);
-  confirmingDelete  = signal<number | null>(null);
-  deleting          = signal<number | null>(null);
-  togglingVis       = signal<number | null>(null);
-  showAll           = signal(true);
+  // ── Estado de lista ───────────────────────────────────────────────────────
+  partidos         = signal<Partido[]>([]);
+  loading          = signal(true);
+  toggling         = signal<number | null>(null);
+  showForm         = signal(false);
+  saving           = signal(false);
+  selectedPartido  = signal<Partido | null>(null);
+  confirmingDelete = signal<number | null>(null);
+  deleting         = signal<number | null>(null);
+  togglingVis      = signal<number | null>(null);
+  showAll          = signal(true);
 
-  // ── Sidebar ─────────────────────────────────────────────────────────────
+  // ── Sidebar ───────────────────────────────────────────────────────────────
   sidebarOpen   = signal(false);
-  gruposOpen    = signal(true);
-  selectedRonda = signal<string | null>(null);
+  selectedGrupo = signal<string | null>(null);   // 'A'..'L' o null
+  selectedFase  = signal<string | null>(null);   // knockout o null
 
-  readonly fases: SidebarFase[] = [
-    {
-      key: 'grupos', label: 'Fase de Grupos', accordion: true,
-      subItems: [
-        { key: 'grupos_d1', label: 'Día 1' },
-        { key: 'grupos_d2', label: 'Día 2' },
-        { key: 'grupos_d3', label: 'Día 3' },
-        { key: 'grupos_d4', label: 'Día 4' },
-      ],
-    },
+  // Datos estáticos del sidebar — se usan en el template con @for
+  readonly grupos = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+  readonly jornadas = [1, 2, 3];
+  readonly fasesEliminacion = [
     { key: '16avos',  label: 'Dieciseisavos de Final' },
     { key: 'octavos', label: 'Octavos de Final' },
     { key: 'cuartos', label: 'Cuartos de Final' },
@@ -56,21 +46,31 @@ export class AdminDashboardComponent implements OnInit {
     { key: 'final',   label: 'Final' },
   ];
 
-  // Partidos filtrados por estado Y por ronda seleccionada
+  // ── Filtrado ──────────────────────────────────────────────────────────────
   filteredPartidos = computed(() => {
     let list = this.partidos();
     if (!this.showAll()) {
       list = list.filter(p => p.estado !== 'finalizado' && p.apuestas_abiertas);
     }
-    const ronda = this.selectedRonda();
-    if (ronda) {
-      list = list.filter(p => p.ronda === ronda);
-    }
+    const grupo = this.selectedGrupo();
+    const fase  = this.selectedFase();
+    if (grupo) list = list.filter(p => p.grupo === grupo);
+    if (fase)  list = list.filter(p => p.ronda === fase);
     return list;
   });
 
   hiddenCount = computed(() => this.partidos().length - this.filteredPartidos().length);
 
+  // Label descriptivo del filtro activo para el header de la tabla
+  activeFilterLabel = computed(() => {
+    const g = this.selectedGrupo();
+    const f = this.selectedFase();
+    if (g) return `Grupo ${g}`;
+    if (f) return this.fasesEliminacion.find(x => x.key === f)?.label ?? f;
+    return null;
+  });
+
+  // ── Formulario ────────────────────────────────────────────────────────────
   formError   = '';
   formSuccess = '';
   form: FormGroup;
@@ -80,6 +80,8 @@ export class AdminDashboardComponent implements OnInit {
       equipo_local:     ['', Validators.required],
       equipo_visitante: ['', Validators.required],
       fecha_partido:    ['', Validators.required],
+      grupo:            ['', Validators.required],
+      jornada:          ['', Validators.required],
     });
   }
 
@@ -93,17 +95,29 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  // ── Sidebar ──────────────────────────────────────────────────────────────
-  toggleSidebar()         { this.sidebarOpen.update(v => !v); }
-  closeSidebar()          { this.sidebarOpen.set(false); }
-  toggleGrupos()          { this.gruposOpen.update(v => !v); }
-  selectRonda(key: string | null) {
-    this.selectedRonda.set(key);
-    this.sidebarOpen.set(false);    // cierra off-canvas en móvil
-  }
-  isFaseGroup(f: SidebarFase): f is FaseGroup { return (f as FaseGroup).accordion === true; }
+  // ── Acciones sidebar ──────────────────────────────────────────────────────
+  toggleSidebar() { this.sidebarOpen.update(v => !v); }
+  closeSidebar()  { this.sidebarOpen.set(false); }
 
-  // ── Partidos ─────────────────────────────────────────────────────────────
+  selectGrupo(g: string) {
+    this.selectedGrupo.set(g);
+    this.selectedFase.set(null);
+    this.sidebarOpen.set(false);
+  }
+
+  selectFase(f: string) {
+    this.selectedFase.set(f);
+    this.selectedGrupo.set(null);
+    this.sidebarOpen.set(false);
+  }
+
+  clearFilter() {
+    this.selectedGrupo.set(null);
+    this.selectedFase.set(null);
+    this.sidebarOpen.set(false);
+  }
+
+  // ── Acciones tabla ────────────────────────────────────────────────────────
   toggle(id: number) {
     this.toggling.set(id);
     this.svc.toggleApuestas(id).subscribe({
@@ -117,12 +131,8 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  openResultado(partido: Partido) { this.selectedPartido.set(partido); }
-
-  onResultadoSaved() {
-    this.selectedPartido.set(null);
-    this.loadPartidos();
-  }
+  openResultado(partido: Partido)  { this.selectedPartido.set(partido); }
+  onResultadoSaved() { this.selectedPartido.set(null); this.loadPartidos(); }
 
   pedirConfirmacionEliminar(id: number) {
     this.confirmingDelete.set(id);
@@ -152,10 +162,7 @@ export class AdminDashboardComponent implements OnInit {
         this.confirmingDelete.set(null);
         this.deleting.set(null);
       },
-      error: () => {
-        this.confirmingDelete.set(null);
-        this.deleting.set(null);
-      },
+      error: () => { this.confirmingDelete.set(null); this.deleting.set(null); },
     });
   }
 
@@ -166,16 +173,16 @@ export class AdminDashboardComponent implements OnInit {
     this.formSuccess = '';
 
     const raw = this.form.value;
-    const fechaFormateada = raw.fecha_partido.replace('T', ' ') + ':00';
-
     this.svc.crear({
       equipo_local:     raw.equipo_local.trim(),
       equipo_visitante: raw.equipo_visitante.trim(),
-      fecha_partido:    fechaFormateada,
+      fecha_partido:    raw.fecha_partido.replace('T', ' ') + ':00',
+      grupo:            raw.grupo,
+      jornada:          +raw.jornada,
     }).subscribe({
       next: nuevo => {
         this.saving.set(false);
-        this.formSuccess = `Partido "${nuevo.equipo_local} vs ${nuevo.equipo_visitante}" creado.`;
+        this.formSuccess = `✓ "${nuevo.equipo_local} vs ${nuevo.equipo_visitante}" creado en Grupo ${nuevo.grupo}`;
         this.form.reset();
         this.loadPartidos();
         setTimeout(() => { this.formSuccess = ''; this.showForm.set(false); }, 2500);

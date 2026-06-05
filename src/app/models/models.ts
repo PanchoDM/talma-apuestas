@@ -16,12 +16,14 @@ export interface Partido {
   equipo_local: string;
   equipo_visitante: string;
   fecha_partido: string;
+  grupo?: string | null;
+  jornada?: number | null;
+  ronda?: string | null;
   goles_local_mt: number | null;
   goles_visitante_mt: number | null;
   estado: 'pendiente' | 'medio_tiempo' | 'finalizado';
   apuestas_abiertas: boolean;
   visible_usuarios: boolean;
-  ronda?: string;
 }
 
 export interface Prediccion {

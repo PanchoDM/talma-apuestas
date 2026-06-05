@@ -34,14 +34,16 @@ export class DashboardComponent implements OnInit {
 
   user = this.auth.currentUser;
 
-  // Título dinámico: usa el campo `ronda` del primer partido activo si está disponible
+  // Título dinámico: prioriza ronda (knockout) > grupo (fase de grupos)
   faseActual = computed(() => {
     const list = this.partidos();
-    if (!list.length) return 'PARTIDOS • FASE DE GRUPOS';
+    if (!list.length) return 'PARTIDOS · FASE DE GRUPOS';
     const activos = list.filter(p => p.estado !== 'finalizado');
     if (!activos.length) return 'TORNEO FINALIZADO';
-    const ronda = activos[0]?.ronda;
-    return ronda ? `PARTIDOS • ${ronda.toUpperCase()}` : 'PARTIDOS • FASE DE GRUPOS';
+    const p = activos[0];
+    if (p?.ronda)  return `PARTIDOS · ${p.ronda.toUpperCase()}`;
+    if (p?.grupo)  return `PARTIDOS · GRUPO ${p.grupo}`;
+    return 'PARTIDOS · FASE DE GRUPOS';
   });
 
   ngOnInit() {

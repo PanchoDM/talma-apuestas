@@ -13,7 +13,7 @@ export class PartidosService {
     return this.http.get<Partido[]>(this.url);
   }
 
-  crear(data: { equipo_local: string; equipo_visitante: string; fecha_partido: string }) {
+  crear(data: { equipo_local: string; equipo_visitante: string; fecha_partido: string; grupo?: string; jornada?: number }) {
     return this.http.post<Partido>(this.url, data);
   }
 

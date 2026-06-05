@@ -1,6 +1,5 @@
 <app-navbar />
 
-<!-- Modal de resultado en tiempo real -->
 @if (selectedPartido()) {
   <app-resultado-modal
     [partido]="selectedPartido()!"
@@ -8,111 +7,116 @@
     (cancel)="selectedPartido.set(null)" />
 }
 
-<!-- Layout de dos columnas: sidebar + contenido -->
 <div class="admin-layout">
 
-  <!-- ── Botón "Filtrar Rondas" — solo visible en móvil ─────────────── -->
-  <button class="btn-sidebar-toggle" (click)="toggleSidebar()">
-    ☰ Filtrar Rondas
-  </button>
-
-  <!-- ── Overlay oscuro al abrir sidebar en móvil ───────────────────── -->
+  <!-- ── Overlay móvil ──────────────────────────────────────────────── -->
   @if (sidebarOpen()) {
     <div class="sidebar-overlay" (click)="closeSidebar()"></div>
   }
 
-  <!-- ── Sidebar de navegación por rondas ───────────────────────────── -->
-  <aside class="admin-sidebar" [class.is-open]="sidebarOpen()">
-
-    <div class="sidebar-header">
+  <!-- ── Sidebar dinámico ───────────────────────────────────────────── -->
+  <nav class="admin-sidebar" [class.is-open]="sidebarOpen()">
+    <header class="sidebar-header">
       <span class="sidebar-label">RONDAS</span>
-      <button class="sidebar-close" (click)="closeSidebar()">✕</button>
-    </div>
+      <button class="sidebar-close" (click)="closeSidebar()" aria-label="Cerrar filtros">✕</button>
+    </header>
 
-    <!-- Todos los partidos -->
-    <button class="sidebar-item"
-            [class.active]="selectedRonda() === null"
-            (click)="selectRonda(null)">
-      Todos los partidos
-    </button>
-
-    <!-- Fase de Grupos (acordeón) -->
-    @if (isFaseGroup(fases[0])) {
-      <div class="sidebar-group">
-        <button class="sidebar-item sidebar-item--group"
-                [class.active]="selectedRonda() === fases[0].key"
-                (click)="selectRonda(fases[0].key); toggleGrupos()">
-          <span>{{ fases[0].label }}</span>
-          <span class="chevron" [class.rotated]="gruposOpen()">›</span>
+    <ul class="sidebar-nav">
+      <!-- Todos -->
+      <li>
+        <button class="sidebar-item"
+                [class.active]="!selectedGrupo() && !selectedFase()"
+                (click)="clearFilter()">
+          Todos los partidos
         </button>
-        @if (gruposOpen()) {
-          <div class="sidebar-subgroup">
-            @for (sub of fases[0].subItems; track sub.key) {
-              <button class="sidebar-item sidebar-item--sub"
-                      [class.active]="selectedRonda() === sub.key"
-                      (click)="selectRonda(sub.key)">
-                {{ sub.label }}
-              </button>
-            }
-          </div>
-        }
-      </div>
-    }
+      </li>
 
-    <!-- Resto de fases -->
-    @for (fase of fases.slice(1); track fase.key) {
-      <button class="sidebar-item"
-              [class.active]="selectedRonda() === fase.key"
-              (click)="selectRonda(fase.key)">
-        {{ fase.label }}
-      </button>
-    }
-  </aside>
+      <!-- Fase de Grupos: 12 grupos generados dinámicamente -->
+      <li class="sidebar-nav__section">FASE DE GRUPOS</li>
+      @for (g of grupos; track g) {
+        <li>
+          <button class="sidebar-item"
+                  [class.active]="selectedGrupo() === g"
+                  (click)="selectGrupo(g)">
+            Grupo {{ g }}
+          </button>
+        </li>
+      }
+
+      <!-- Fase de Eliminación directa -->
+      <li class="sidebar-nav__section">ELIMINACIÓN DIRECTA</li>
+      @for (fase of fasesEliminacion; track fase.key) {
+        <li>
+          <button class="sidebar-item"
+                  [class.active]="selectedFase() === fase.key"
+                  (click)="selectFase(fase.key)">
+            {{ fase.label }}
+          </button>
+        </li>
+      }
+    </ul>
+  </nav>
 
   <!-- ── Contenido principal ────────────────────────────────────────── -->
   <main class="admin-page">
-    <div class="admin-header">
+
+    <header class="admin-header">
       <h1>Panel de <span>Administración</span></h1>
-      <p>Gestión de partidos y control de apuestas · talmaFM 2026</p>
-    </div>
+      <p>Mundial 2026 · 48 equipos · 12 grupos</p>
+    </header>
 
-    <div class="admin-restriction-notice">
-      ⚠ Como administrador, no puedes realizar predicciones. Tu rol es gestionar la plataforma.
-    </div>
+    <p class="admin-restriction-notice">
+      ⚠ Como administrador no puedes realizar predicciones. Tu rol es gestionar la plataforma.
+    </p>
 
-    <!-- ── Agregar nuevo partido ─────────────────────────────────────── -->
+    <!-- ── Agregar partido ───────────────────────────────────────────── -->
     <section class="admin-section">
-      <div class="section-header">
+      <header class="section-header">
         <h2>Agregar Partido</h2>
         <button class="btn-toggle-form" (click)="showForm.update(v => !v)">
           {{ showForm() ? '✕ Cancelar' : '+ Nuevo partido' }}
         </button>
-      </div>
+      </header>
 
       @if (showForm()) {
         <form class="partido-form" [formGroup]="form" (ngSubmit)="submitPartido()">
-          <div class="partido-form__fields">
+
+          <!-- Fila 1: equipos -->
+          <div class="partido-form__row">
             <div class="form-group">
               <label>Equipo Local</label>
-              <app-country-autocomplete
-                formControlName="equipo_local"
-                placeholder="Ej: México" />
+              <app-country-autocomplete formControlName="equipo_local" placeholder="Ej: México" />
             </div>
-
-            <div class="form-group form-group--vs">
-              <span class="vs-badge">VS</span>
-            </div>
-
+            <span class="vs-badge">VS</span>
             <div class="form-group">
               <label>Equipo Visitante</label>
-              <app-country-autocomplete
-                formControlName="equipo_visitante"
-                placeholder="Ej: Argentina" />
+              <app-country-autocomplete formControlName="equipo_visitante" placeholder="Ej: Argentina" />
             </div>
+          </div>
 
-            <div class="form-group form-group--date">
+          <!-- Fila 2: fecha, grupo, jornada -->
+          <div class="partido-form__row partido-form__row--meta">
+            <div class="form-group">
               <label>Fecha y Hora</label>
               <input formControlName="fecha_partido" type="datetime-local" />
+            </div>
+            <div class="form-group">
+              <label>Grupo</label>
+              <select formControlName="grupo">
+                <option value="">Seleccionar...</option>
+                @for (g of grupos; track g) {
+                  <option [value]="g">Grupo {{ g }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Jornada</label>
+              <select formControlName="jornada">
+                <option value="">Seleccionar...</option>
+                @for (j of jornadas; track j) {
+                  <option [value]="j">Jornada {{ j }}</option>
+                }
+              </select>
             </div>
           </div>
 
@@ -131,36 +135,35 @@
             </div>
           }
 
-          @if (formError)   { <div class="error-msg">{{ formError }}</div> }
-          @if (formSuccess) { <div class="success-msg">{{ formSuccess }}</div> }
+          @if (formError)   { <p class="error-msg">{{ formError }}</p> }
+          @if (formSuccess) { <p class="success-msg">{{ formSuccess }}</p> }
 
-          <div class="partido-form__actions">
+          <footer class="partido-form__footer">
             <button type="submit" class="btn-create" [disabled]="saving() || form.invalid">
               {{ saving() ? 'Creando...' : 'Crear Partido y Notificar Usuarios' }}
             </button>
-          </div>
+          </footer>
         </form>
       }
     </section>
 
     <!-- ── Control de partidos ──────────────────────────────────────── -->
     <section class="admin-section">
-      <div class="section-header">
-        <h2>Control de Partidos</h2>
-        <div class="section-header__right">
-          @if (selectedRonda()) {
-            <span class="ronda-badge">{{ selectedRonda() }}</span>
+      <header class="section-header">
+        <h2>
+          Control de Partidos
+          @if (activeFilterLabel()) {
+            <span class="filter-chip">{{ activeFilterLabel() }}</span>
           }
+        </h2>
+        <div class="section-header__right">
           <button class="btn-filter" (click)="showAll.update(v => !v)">
-            @if (showAll()) {
-              Ocultar finalizados / cerrados
-            } @else {
-              Ver todos <span class="hidden-badge">{{ hiddenCount() }} ocultos</span>
-            }
+            @if (showAll()) { Ocultar cerrados }
+            @else { Ver todos <span class="hidden-badge">{{ hiddenCount() }} ocultos</span> }
           </button>
           <span class="total-badge">{{ filteredPartidos().length }} partidos</span>
         </div>
-      </div>
+      </header>
 
       @if (loading()) {
         <p class="loading-text">Cargando partidos...</p>
@@ -170,6 +173,8 @@
             <tr>
               <th>#</th>
               <th>Partido</th>
+              <th>Grupo</th>
+              <th>Jornada</th>
               <th>Fecha</th>
               <th>Estado</th>
               <th>Marcador MT</th>
@@ -191,20 +196,27 @@
                   <strong>{{ partido.equipo_visitante }}</strong>
                 </td>
 
+                <td>
+                  @if (partido.grupo) {
+                    <span class="grupo-chip">{{ partido.grupo }}</span>
+                  } @else { <span class="no-score">–</span> }
+                </td>
+
+                <td>
+                  @if (partido.jornada) { J{{ partido.jornada }} }
+                  @else { <span class="no-score">–</span> }
+                </td>
+
                 <td>{{ partido.fecha_partido | date:'d MMM, HH:mm' }}</td>
 
                 <td>
-                  <span class="status-chip status-{{ partido.estado }}">
-                    {{ partido.estado }}
-                  </span>
+                  <span class="status-chip status-{{ partido.estado }}">{{ partido.estado }}</span>
                 </td>
 
                 <td class="score-col">
                   @if (partido.goles_local_mt !== null) {
                     {{ partido.goles_local_mt }} – {{ partido.goles_visitante_mt }}
-                  } @else {
-                    <span class="no-score">–</span>
-                  }
+                  } @else { <span class="no-score">–</span> }
                 </td>
 
                 <td>
@@ -214,12 +226,11 @@
                 </td>
 
                 <td class="vis-col">
-                  <button
-                    class="btn-vis"
-                    [class.hidden-state]="!partido.visible_usuarios"
-                    [disabled]="togglingVis() === partido.id"
-                    (click)="toggleVisibilidad(partido.id)"
-                    [title]="partido.visible_usuarios ? 'Visible · clic para ocultar' : 'Oculto · clic para mostrar'">
+                  <button class="btn-vis"
+                          [class.hidden-state]="!partido.visible_usuarios"
+                          [disabled]="togglingVis() === partido.id"
+                          (click)="toggleVisibilidad(partido.id)"
+                          [title]="partido.visible_usuarios ? 'Visible · clic para ocultar' : 'Oculto · clic para mostrar'">
                     @if (partido.visible_usuarios) {
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -237,38 +248,27 @@
 
                 <td class="actions-col">
                   @if (partido.estado !== 'finalizado') {
-                    <button class="btn-result" (click)="openResultado(partido)" title="Registrar resultado final">
-                      🏁 Resultado
-                    </button>
+                    <button class="btn-result" (click)="openResultado(partido)">🏁 Resultado</button>
                   } @else {
-                    <span class="result-locked" title="Partido finalizado · resultado bloqueado">
-                      🔒 FIN
-                    </span>
+                    <span class="result-locked">🔒 FIN</span>
                   }
-
-                  <button
-                    class="btn-toggle"
-                    [class.closing]="partido.apuestas_abiertas"
-                    [disabled]="toggling() === partido.id"
-                    (click)="toggle(partido.id)">
+                  <button class="btn-toggle"
+                          [class.closing]="partido.apuestas_abiertas"
+                          [disabled]="toggling() === partido.id"
+                          (click)="toggle(partido.id)">
                     {{ toggling() === partido.id ? '...' : partido.apuestas_abiertas ? 'Cerrar' : 'Abrir' }}
                   </button>
-
                   @if (partido.estado === 'pendiente') {
                     @if (confirmingDelete() === partido.id) {
                       <span class="confirm-delete">
                         <span class="confirm-text">¿Eliminar?</span>
-                        <button class="btn-yes"
-                          [disabled]="deleting() === partido.id"
-                          (click)="eliminar(partido.id)">
+                        <button class="btn-yes" [disabled]="deleting() === partido.id" (click)="eliminar(partido.id)">
                           {{ deleting() === partido.id ? '...' : 'Sí' }}
                         </button>
                         <button class="btn-no" (click)="confirmingDelete.set(null)">No</button>
                       </span>
                     } @else {
-                      <button class="btn-delete" (click)="pedirConfirmacionEliminar(partido.id)" title="Eliminar partido">
-                        🗑
-                      </button>
+                      <button class="btn-delete" (click)="pedirConfirmacionEliminar(partido.id)">🗑</button>
                     }
                   }
                 </td>
@@ -279,4 +279,8 @@
       }
     </section>
   </main>
+
+  <!-- ── Botón flotante — solo móvil ────────────────────────────────── -->
+  <button class="btn-sidebar-toggle" (click)="toggleSidebar()">☰ Filtrar</button>
+
 </div>

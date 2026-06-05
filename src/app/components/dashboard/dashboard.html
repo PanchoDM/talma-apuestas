@@ -39,7 +39,7 @@
         @for (partido of partidos(); track partido.id) {
           <div class="match-card" [class.locked]="!partido.apuestas_abiertas">
             <div class="match-card__header">
-              <span class="match-date">{{ partido.fecha_partido | date:'d MMM · HH:mm' }}</span>
+              <span class="match-date">{{ partido.fecha_partido | date:'d MMM · HH:mm':'UTC' }}</span>
               <span class="badge" [ngClass]="getEstadoBadgeClass(partido.estado)">
                 {{ partido.estado === 'pendiente' ? 'Próximo' : partido.estado === 'medio_tiempo' ? '⚡ En vivo MT' : '✓ Finalizado' }}
               </span>

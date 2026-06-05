@@ -207,7 +207,7 @@
                   @else { <span class="no-score">–</span> }
                 </td>
 
-                <td>{{ partido.fecha_partido | date:'d MMM, HH:mm' }}</td>
+                <td>{{ partido.fecha_partido | date:'d MMM, HH:mm':'UTC' }}</td>
 
                 <td>
                   <span class="status-chip status-{{ partido.estado }}">{{ partido.estado }}</span>

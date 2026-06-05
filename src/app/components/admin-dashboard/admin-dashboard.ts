@@ -176,7 +176,7 @@ export class AdminDashboardComponent implements OnInit {
     this.svc.crear({
       equipo_local:     raw.equipo_local.trim(),
       equipo_visitante: raw.equipo_visitante.trim(),
-      fecha_partido:    raw.fecha_partido.replace('T', ' ') + ':00',
+      fecha_partido:    new Date(raw.fecha_partido).toISOString(),
       grupo:            raw.grupo,
       jornada:          +raw.jornada,
     }).subscribe({

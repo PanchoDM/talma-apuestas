@@ -8,6 +8,19 @@
   <app-prediccion-form [partido]="selectedPartido()!" (saved)="onSaved()" (cancel)="selectedPartido.set(null)" />
 }
 
+<!-- Sidebar de navegación — se oculta al borde izquierdo, se despliega al hover -->
+<nav class="dash-sidebar">
+  <div class="dash-sidebar__tab">NAV</div>
+  <div class="dash-sidebar__panel">
+    <p class="dash-sidebar__label">Ir a sección</p>
+    @for (seccion of partidosAgrupados(); track seccion.titulo) {
+      <button class="dash-sidebar__item" (click)="scrollTo(seccion.titulo)">
+        {{ seccion.titulo }}
+      </button>
+    }
+  </div>
+</nav>
+
 <main class="dashboard">
   <!-- Hero estadio -->
   <section class="dashboard__hero">
@@ -35,7 +48,7 @@
     </section>
   } @else {
     @for (seccion of partidosAgrupados(); track seccion.titulo) {
-      <section class="dashboard__matches">
+      <section class="dashboard__matches" [attr.id]="sectionId(seccion.titulo)">
         <h2 class="section-title">{{ seccion.titulo }}</h2>
         <div class="matches-grid">
           @for (partido of seccion.partidos; track partido.id) {

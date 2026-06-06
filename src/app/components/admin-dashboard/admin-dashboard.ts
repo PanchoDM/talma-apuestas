@@ -46,6 +46,45 @@ export class AdminDashboardComponent implements OnInit {
     { key: 'final',   label: 'Final' },
   ];
 
+  // ── Visibilidad de fases (Interruptores Maestros) ────────────────────────
+  togglingFaseVis = signal<string | null>(null);
+
+  visibilidadGrupos = computed(() => {
+    const map = new Map<string, boolean>();
+    for (const g of this.grupos) {
+      const ps = this.partidos().filter(p => p.grupo === g);
+      if (ps.length) map.set(g, ps.every(p => p.visible_usuarios));
+    }
+    return map;
+  });
+
+  visibilidadRondas = computed(() => {
+    const map = new Map<string, boolean>();
+    for (const f of this.fasesEliminacion) {
+      const ps = this.partidos().filter(p => p.ronda === f.key);
+      if (ps.length) map.set(f.key, ps.every(p => p.visible_usuarios));
+    }
+    return map;
+  });
+
+  toggleVisibilidadFase(tipo: 'grupo' | 'ronda', valor: string) {
+    const mapa   = tipo === 'grupo' ? this.visibilidadGrupos() : this.visibilidadRondas();
+    const newVis = !(mapa.get(valor) ?? true);
+    const key    = `${tipo}:${valor}`;
+    this.togglingFaseVis.set(key);
+    this.svc.setVisibilidadFase(tipo, valor, newVis).subscribe({
+      next: () => {
+        this.partidos.update(list => list.map(p => {
+          if (tipo === 'grupo' && p.grupo === valor) return { ...p, visible_usuarios: newVis };
+          if (tipo === 'ronda' && p.ronda === valor) return { ...p, visible_usuarios: newVis };
+          return p;
+        }));
+        this.togglingFaseVis.set(null);
+      },
+      error: () => this.togglingFaseVis.set(null),
+    });
+  }
+
   // ── Filtrado ──────────────────────────────────────────────────────────────
   filteredPartidos = computed(() => {
     let list = this.partidos();

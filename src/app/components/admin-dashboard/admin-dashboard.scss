@@ -653,3 +653,68 @@
 // ── Columnas nuevas en la tabla ────────────────────────────────────────────
 .col-grupo   { text-align: center; }
 .col-jornada { text-align: center; color: #adb5bd; font-size: 0.82rem; }
+
+// ── Visibilidad de Fases (Interruptores Maestros) ──────────────────────────
+.vis-fase-layout {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.vis-fase-group {
+  flex: 1;
+  min-width: 260px;
+}
+
+.vis-fase-label {
+  color: #495057;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin: 0 0 0.75rem;
+}
+
+.vis-fase-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  &--wide { flex-direction: column; gap: 0.4rem; }
+}
+
+.btn-fase-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(40,167,69,0.1);
+  border: 1px solid rgba(40,167,69,0.3);
+  color: #28a745;
+  border-radius: 8px;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
+  white-space: nowrap;
+
+  &__key { letter-spacing: 0.3px; }
+  &__dot { font-size: 0.65rem; opacity: 0.7; }
+
+  &:hover:not(:disabled) { filter: brightness(1.25); transform: translateY(-1px); }
+  &:disabled             { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  &:not(.is-visible):not(.no-data) {
+    background: rgba(108,117,125,0.1);
+    border-color: rgba(108,117,125,0.25);
+    color: #6c757d;
+  }
+
+  &.no-data {
+    background: rgba(255,255,255,0.02);
+    border-color: rgba(255,255,255,0.06);
+    color: #3d3d50;
+  }
+
+  &--wide { width: 100%; justify-content: space-between; }
+}

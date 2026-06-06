@@ -260,6 +260,90 @@
 @keyframes shimmer { 0% { background-position: 100% 0 } 100% { background-position: -100% 0 } }
 @keyframes blink   { 0%,100% { opacity: 1 } 50% { opacity: 0.4 } }
 
+// ── Sidebar de navegación auto-oculto ─────────────────────────────────────
+.dash-sidebar {
+  position: fixed;
+  left: 0;
+  top: 64px;
+  width: 192px;
+  height: calc(100vh - 64px);
+  z-index: 200;
+  display: flex;
+  // Muestra solo el tab de 20px; el panel queda fuera de la pantalla
+  transform: translateX(calc(-100% + 20px));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateX(0);
+  }
+
+  &__tab {
+    width: 20px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #e63946, #c1121f);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.52rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: default;
+    user-select: none;
+  }
+
+  &__panel {
+    flex: 1;
+    background: #1a1a2e;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+    padding: 1.2rem 0 2rem;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar       { width: 3px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+  }
+
+  &__label {
+    color: #495057;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 0 1rem 0.6rem;
+    margin: 0;
+    display: block;
+  }
+
+  &__item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    border-left: 2px solid transparent;
+    color: #adb5bd;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+    &:hover {
+      background: rgba(255,255,255,0.04);
+      color: #fff;
+      border-left-color: #e63946;
+    }
+  }
+
+  // Ocultar en móvil — allí no cabe el sidebar
+  @media (max-width: 768px) { display: none; }
+}
+
 // ── Responsive (Mobile First) ───────────────────────────────────────────────
 @media (max-width: 600px) {
   .dashboard__hero {

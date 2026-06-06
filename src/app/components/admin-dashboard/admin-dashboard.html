@@ -278,6 +278,59 @@
         </table>
       }
     </section>
+
+    <!-- ── Visibilidad de Fases ────────────────────────────────────────── -->
+    <section class="admin-section">
+      <header class="section-header">
+        <h2>Visibilidad de Fases</h2>
+        <span class="total-badge">Interruptores Maestros</span>
+      </header>
+
+      <div class="vis-fase-layout">
+        <!-- Fase de Grupos -->
+        <div class="vis-fase-group">
+          <p class="vis-fase-label">FASE DE GRUPOS</p>
+          <div class="vis-fase-toggles">
+            @for (g of grupos; track g) {
+              <button class="btn-fase-toggle"
+                      [class.is-visible]="visibilidadGrupos().get(g) !== false"
+                      [class.no-data]="!visibilidadGrupos().has(g)"
+                      [disabled]="!visibilidadGrupos().has(g) || togglingFaseVis() === 'grupo:' + g"
+                      (click)="toggleVisibilidadFase('grupo', g)">
+                <span class="btn-fase-toggle__key">{{ g }}</span>
+                <span class="btn-fase-toggle__dot">
+                  @if (!visibilidadGrupos().has(g)) { — }
+                  @else if (visibilidadGrupos().get(g)) { ● }
+                  @else { ○ }
+                </span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Eliminación Directa -->
+        <div class="vis-fase-group">
+          <p class="vis-fase-label">ELIMINACIÓN DIRECTA</p>
+          <div class="vis-fase-toggles vis-fase-toggles--wide">
+            @for (fase of fasesEliminacion; track fase.key) {
+              <button class="btn-fase-toggle btn-fase-toggle--wide"
+                      [class.is-visible]="visibilidadRondas().get(fase.key) !== false"
+                      [class.no-data]="!visibilidadRondas().has(fase.key)"
+                      [disabled]="!visibilidadRondas().has(fase.key) || togglingFaseVis() === 'ronda:' + fase.key"
+                      (click)="toggleVisibilidadFase('ronda', fase.key)">
+                <span class="btn-fase-toggle__key">{{ fase.label }}</span>
+                <span class="btn-fase-toggle__dot">
+                  @if (!visibilidadRondas().has(fase.key)) { — }
+                  @else if (visibilidadRondas().get(fase.key)) { ● }
+                  @else { ○ }
+                </span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- ── Botón flotante — solo móvil ────────────────────────────────── -->

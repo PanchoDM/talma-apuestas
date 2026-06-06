@@ -46,7 +46,8 @@ export class DashboardComponent implements OnInit {
   };
 
   partidosAgrupados = computed(() => {
-    const list = this.partidos();
+    // Excluir partidos ocultos por el admin antes de agrupar
+    const list = this.partidos().filter(p => p.visible_usuarios !== false);
     const grupoMap = new Map<string, Partido[]>();
     const rondaMap = new Map<string, Partido[]>();
 
@@ -125,6 +126,14 @@ export class DashboardComponent implements OnInit {
   onSaved() {
     this.selectedPartido.set(null);
     this.loadData();
+  }
+
+  sectionId(titulo: string): string {
+    return 'sec-' + titulo.toLowerCase().replace(/[\s·]+/g, '-');
+  }
+
+  scrollTo(titulo: string) {
+    document.getElementById(this.sectionId(titulo))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   getEstadoBadgeClass(estado: string): string {

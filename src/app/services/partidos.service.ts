@@ -36,4 +36,11 @@ export class PartidosService {
   marcadorEnVivo(id: number, data: { goles_local_mt: number; goles_visitante_mt: number }) {
     return this.http.put<{ message: string; partido_id: number }>(`${this.url}/${id}/marcador-en-vivo`, data);
   }
+
+  setVisibilidadFase(tipo: 'grupo' | 'ronda', valor: string, visible: boolean) {
+    return this.http.put<{ updated: number; tipo: string; valor: string; visible: boolean }>(
+      `${this.url}/visibilidad-fase`,
+      { tipo, valor, visible }
+    );
+  }
 }

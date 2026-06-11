@@ -24,6 +24,34 @@ export interface Partido {
   estado: 'pendiente' | 'medio_tiempo' | 'finalizado';
   apuestas_abiertas: boolean;
   visible_usuarios: boolean;
+  penales_habilitados?: boolean;
+  penales_local?: number | null;
+  penales_visitante?: number | null;
+}
+
+export interface PartidoStats {
+  partido_id: number;
+  total: number;
+  local: number;
+  empate: number;
+  visitante: number;
+  pct_local: number;
+  pct_empate: number;
+  pct_visitante: number;
+  avg_local: number | null;
+  avg_visitante: number | null;
+}
+
+export interface ResumenAdmin {
+  partidos: {
+    total: number;
+    pendientes: number;
+    en_vivo: number;
+    finalizados: number;
+    apuestas_abiertas: number;
+  };
+  usuarios: number;
+  predicciones: number;
 }
 
 export interface Prediccion {

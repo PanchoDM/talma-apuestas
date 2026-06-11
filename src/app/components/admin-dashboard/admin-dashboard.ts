@@ -1,8 +1,8 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PartidosService } from '../../services/partidos.service';
-import { Partido } from '../../models/models';
+import { Partido, PartidoStats, ResumenAdmin } from '../../models/models';
 import { NavbarComponent } from '../navbar/navbar';
 import { CountryAutocompleteComponent } from '../country-autocomplete/country-autocomplete';
 import { ResultadoModalComponent } from '../resultado-modal/resultado-modal';
@@ -11,7 +11,7 @@ import { FlagPipe } from '../../pipes/flag.pipe';
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, DatePipe, NavbarComponent, ReactiveFormsModule,
+  imports: [CommonModule, DatePipe, NavbarComponent, ReactiveFormsModule, FormsModule,
             CountryAutocompleteComponent, ResultadoModalComponent, FlagPipe],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss',
@@ -28,6 +28,15 @@ export class AdminDashboardComponent implements OnInit {
   deleting         = signal<number | null>(null);
   togglingVis      = signal<number | null>(null);
   showAll          = signal(true);
+
+  // ── v2.1: resumen, búsqueda, penales, stats y acciones masivas ───────────
+  resumen          = signal<ResumenAdmin | null>(null);
+  busqueda         = signal('');
+  togglingPenales  = signal<number | null>(null);
+  statsPartido     = signal<PartidoStats | null>(null);
+  statsDe          = signal<Partido | null>(null);
+  confirmCerrarTodas = signal(false);
+  cerrandoTodas    = signal(false);
 
   // ── Sidebar ───────────────────────────────────────────────────────────────
   sidebarOpen   = signal(false);
@@ -95,6 +104,14 @@ export class AdminDashboardComponent implements OnInit {
     const fase  = this.selectedFase();
     if (grupo) list = list.filter(p => p.grupo === grupo);
     if (fase)  list = list.filter(p => p.ronda === fase);
+
+    const q = this.busqueda().trim().toLowerCase();
+    if (q) {
+      list = list.filter(p =>
+        p.equipo_local.toLowerCase().includes(q) ||
+        p.equipo_visitante.toLowerCase().includes(q) ||
+        String(p.id) === q);
+    }
     return list;
   });
 
@@ -124,7 +141,11 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  ngOnInit() { this.loadPartidos(); }
+  ngOnInit() { this.loadPartidos(); this.loadResumen(); }
+
+  loadResumen() {
+    this.svc.getResumen().subscribe({ next: r => this.resumen.set(r), error: () => {} });
+  }
 
   loadPartidos() {
     this.loading.set(true);
@@ -202,6 +223,53 @@ export class AdminDashboardComponent implements OnInit {
         this.deleting.set(null);
       },
       error: () => { this.confirmingDelete.set(null); this.deleting.set(null); },
+    });
+  }
+
+  // ── v2.1: penales ─────────────────────────────────────────────────────────
+  togglePenales(id: number) {
+    this.togglingPenales.set(id);
+    this.svc.togglePenales(id).subscribe({
+      next: updated => {
+        this.partidos.update(list => list.map(p => p.id === +updated.id
+          ? { ...p, penales_habilitados: updated.penales_habilitados,
+              penales_local: updated.penales_habilitados ? (p.penales_local ?? 0) : null,
+              penales_visitante: updated.penales_habilitados ? (p.penales_visitante ?? 0) : null }
+          : p));
+        this.togglingPenales.set(null);
+      },
+      error: () => this.togglingPenales.set(null),
+    });
+  }
+
+  // ── v2.1: distribución de apuestas por partido ───────────────────────────
+  verStats(partido: Partido) {
+    this.statsDe.set(partido);
+    this.statsPartido.set(null);
+    this.svc.getStats(partido.id).subscribe({
+      next: st => this.statsPartido.set(st),
+      error: () => this.statsDe.set(null),
+    });
+  }
+
+  cerrarStats() { this.statsDe.set(null); this.statsPartido.set(null); }
+
+  // ── v2.1: cerrar todas las apuestas ──────────────────────────────────────
+  cerrarTodas() {
+    if (!this.confirmCerrarTodas()) {
+      this.confirmCerrarTodas.set(true);
+      setTimeout(() => this.confirmCerrarTodas.set(false), 5000);
+      return;
+    }
+    this.cerrandoTodas.set(true);
+    this.svc.cerrarTodas().subscribe({
+      next: () => {
+        this.partidos.update(list => list.map(p => ({ ...p, apuestas_abiertas: false })));
+        this.cerrandoTodas.set(false);
+        this.confirmCerrarTodas.set(false);
+        this.loadResumen();
+      },
+      error: () => { this.cerrandoTodas.set(false); this.confirmCerrarTodas.set(false); },
     });
   }
 

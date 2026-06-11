@@ -26,7 +26,15 @@ export class ResultadoModalComponent implements OnInit {
   error      = '';
   liveSuccess = '';
 
+  savingPenales  = false;
+  penalesSuccess = '';
+  formPenales!: FormGroup;
+
   ngOnInit() {
+    this.formPenales = this.fb.group({
+      penales_local:     [this.partido.penales_local ?? 0,     [Validators.required, Validators.min(0), Validators.max(20)]],
+      penales_visitante: [this.partido.penales_visitante ?? 0, [Validators.required, Validators.min(0), Validators.max(20)]],
+    });
     this.form = this.fb.group({
       goles_local:     [
         this.partido.goles_local_mt ?? 0,
@@ -53,6 +61,30 @@ export class ResultadoModalComponent implements OnInit {
     }).subscribe({
       next: () => { this.saving = false; this.saved.emit(); },
       error: err => { this.saving = false; this.error = err.error?.message || 'Error al guardar'; },
+    });
+  }
+
+  // 🥅 Actualiza el marcador de la tanda de penales en vivo (notifica por SSE)
+  submitPenales() {
+    if (this.formPenales.invalid) return;
+    this.savingPenales  = true;
+    this.error          = '';
+    this.penalesSuccess = '';
+    const { penales_local, penales_visitante } = this.formPenales.value;
+
+    this.svc.actualizarPenales(this.partido.id, {
+      penales_local:     +penales_local,
+      penales_visitante: +penales_visitante,
+    }).subscribe({
+      next: () => {
+        this.savingPenales  = false;
+        this.penalesSuccess = '🥅 Marcador de penales actualizado';
+        setTimeout(() => this.penalesSuccess = '', 3500);
+      },
+      error: err => {
+        this.savingPenales = false;
+        this.error = err.error?.message || 'Error al actualizar penales';
+      },
     });
   }
 

@@ -37,6 +37,24 @@
     </div>
   </section>
 
+  <!-- ── Barra de búsqueda y filtros rápidos ──────────────────────────── -->
+  <section class="dashboard__toolbar">
+    <div class="toolbar-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Buscar equipo... (ej: Brasil)"
+             [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
+      @if (busqueda()) {
+        <button class="search-clear" (click)="busqueda.set('')">✕</button>
+      }
+    </div>
+    <div class="toolbar-chips">
+      <button class="chip" [class.active]="filtroChip() === 'todos'"       (click)="setFiltro('todos')">Todos</button>
+      <button class="chip" [class.active]="filtroChip() === 'abiertas'"    (click)="setFiltro('abiertas')">🔥 Apuestas abiertas</button>
+      <button class="chip chip-live" [class.active]="filtroChip() === 'en-vivo'" (click)="setFiltro('en-vivo')">⚡ En vivo</button>
+      <button class="chip" [class.active]="filtroChip() === 'mis-apuestas'" (click)="setFiltro('mis-apuestas')">🎯 Mis apuestas</button>
+    </div>
+  </section>
+
   <!-- Partidos agrupados por fase / grupo -->
   @if (loading()) {
     <section class="dashboard__matches">
@@ -47,16 +65,26 @@
       </div>
     </section>
   } @else {
+    @if (partidosAgrupados().length === 0) {
+      <section class="dashboard__matches">
+        <p class="empty-state">No hay partidos que coincidan con tu búsqueda o filtro.</p>
+      </section>
+    }
     @for (seccion of partidosAgrupados(); track seccion.titulo) {
       <section class="dashboard__matches" [attr.id]="sectionId(seccion.titulo)">
         <h2 class="section-title">{{ seccion.titulo }}</h2>
         <div class="matches-grid">
-          @for (partido of seccion.partidos; track partido.id) {
-            <div class="match-card" [class.locked]="!partido.apuestas_abiertas">
+          @for (partido of seccion.partidos; track partido.id; let i = $index) {
+            <div class="match-card anim-enter"
+                 [style.animation-delay.ms]="i * 60"
+                 [class.locked]="!partido.apuestas_abiertas"
+                 [class.is-live]="partido.estado === 'medio_tiempo'"
+                 [class.goal-flash]="flashScore().has(partido.id)">
               <div class="match-card__header">
                 <span class="match-date">{{ partido.fecha_partido | date:'d MMM · HH:mm':'UTC' }}</span>
                 <span class="badge" [ngClass]="getEstadoBadgeClass(partido.estado)">
-                  {{ partido.estado === 'pendiente' ? 'Próximo' : partido.estado === 'medio_tiempo' ? '⚡ En vivo MT' : '✓ Finalizado' }}
+                  @if (partido.estado === 'medio_tiempo') { <span class="live-dot"></span> }
+                  {{ partido.estado === 'pendiente' ? 'Próximo' : partido.estado === 'medio_tiempo' ? 'En vivo MT' : '✓ Finalizado' }}
                 </span>
               </div>
 
@@ -66,7 +94,9 @@
                   <span class="team-name">{{ partido.equipo_local }}</span>
                 </div>
                 @if (partido.goles_local_mt !== null) {
-                  <span class="live-score">{{ partido.goles_local_mt }} – {{ partido.goles_visitante_mt }}</span>
+                  <span class="live-score" [class.score-pulse]="flashScore().has(partido.id)">
+                    {{ partido.goles_local_mt }} – {{ partido.goles_visitante_mt }}
+                  </span>
                 } @else {
                   <span class="vs-label">VS</span>
                 }
@@ -76,12 +106,33 @@
                 </div>
               </div>
 
+              <!-- 🥅 Panel de tanda de penales (solo si el admin la habilitó) -->
+              @if (partido.penales_habilitados) {
+                <div class="penales-panel" [class.penales-flash]="flashPenales().has(partido.id)">
+                  <span class="penales-label">🥅 Tanda de penales</span>
+                  <div class="penales-score">
+                    <span class="penales-team">{{ partido.equipo_local | flag }}</span>
+                    <span class="penales-num">{{ partido.penales_local ?? 0 }}</span>
+                    <span class="penales-sep">·</span>
+                    <span class="penales-num">{{ partido.penales_visitante ?? 0 }}</span>
+                    <span class="penales-team">{{ partido.equipo_visitante | flag }}</span>
+                  </div>
+                </div>
+              }
+
+              <!-- ⏳ Cuenta regresiva al cierre de apuestas -->
+              @if (countdown(partido); as cd) {
+                <div class="countdown" [class.countdown--urgente]="countdownUrgente(partido)">
+                  ⏳ Apuestas cierran en <strong>{{ cd }}</strong>
+                </div>
+              }
+
               @if (getPrediccion(partido.id); as pred) {
                 <div class="match-card__prediction">
                   <span class="pred-score">Mi apuesta: {{ pred.goles_local_esperados_mt }} – {{ pred.goles_visitante_esperados_mt }}</span>
                   @if (pred.puntos_obtenidos !== null) {
                     <span class="pts-badge" [ngClass]="getPuntosClass(pred.puntos_obtenidos)">
-                      {{ pred.puntos_obtenidos === 10 ? '⭐ Exacto!' : pred.puntos_obtenidos === 3 ? '✓ Tendencia' : '✗ Sin pts' }}
+                      {{ pred.puntos_obtenidos >= 7 ? '⭐ Exacto!' : pred.puntos_obtenidos === 3 ? '✓ Tendencia' : '✗ Sin pts' }}
                       · {{ pred.puntos_obtenidos }} pts
                     </span>
                   } @else {
@@ -98,6 +149,43 @@
                     </span>
                   }
                 </div>
+              }
+
+              <!-- 📊 Probabilidades de la comunidad -->
+              @if (puedeVerStats(partido)) {
+                <button class="btn-stats" (click)="toggleStats(partido)">
+                  {{ statsAbiertas().has(partido.id) ? '▲ Ocultar probabilidades' : '📊 Ver probabilidades' }}
+                </button>
+                @if (statsAbiertas().has(partido.id)) {
+                  @if (statsLoading() === partido.id) {
+                    <p class="stats-loading">Cargando...</p>
+                  } @else if (getStats(partido.id); as st) {
+                    @if (st.total > 0) {
+                      <div class="prob-panel">
+                        <div class="prob-row">
+                          <span class="prob-name">{{ partido.equipo_local | flag }} Local</span>
+                          <div class="prob-track"><div class="prob-fill prob-fill--local" [style.width.%]="st.pct_local"></div></div>
+                          <span class="prob-pct">{{ st.pct_local }}%</span>
+                        </div>
+                        <div class="prob-row">
+                          <span class="prob-name">🤝 Empate</span>
+                          <div class="prob-track"><div class="prob-fill prob-fill--empate" [style.width.%]="st.pct_empate"></div></div>
+                          <span class="prob-pct">{{ st.pct_empate }}%</span>
+                        </div>
+                        <div class="prob-row">
+                          <span class="prob-name">{{ partido.equipo_visitante | flag }} Visitante</span>
+                          <div class="prob-track"><div class="prob-fill prob-fill--visitante" [style.width.%]="st.pct_visitante"></div></div>
+                          <span class="prob-pct">{{ st.pct_visitante }}%</span>
+                        </div>
+                        <p class="prob-meta">
+                          {{ st.total }} predicciones · marcador promedio {{ st.avg_local }}–{{ st.avg_visitante }}
+                        </p>
+                      </div>
+                    } @else {
+                      <p class="prob-meta">Aún no hay predicciones para este partido.</p>
+                    }
+                  }
+                }
               }
             </div>
           }

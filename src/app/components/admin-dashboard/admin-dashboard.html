@@ -69,6 +69,56 @@
       ⚠ Como administrador no puedes realizar predicciones. Tu rol es gestionar la plataforma.
     </p>
 
+    <!-- ── v2.1: Resumen del torneo ─────────────────────────────────────── -->
+    @if (resumen(); as r) {
+      <section class="resumen-grid">
+        <div class="resumen-card"><span class="resumen-value">{{ r.usuarios }}</span><span class="resumen-label">Usuarios</span></div>
+        <div class="resumen-card"><span class="resumen-value">{{ r.predicciones }}</span><span class="resumen-label">Predicciones</span></div>
+        <div class="resumen-card"><span class="resumen-value">{{ r.partidos.total }}</span><span class="resumen-label">Partidos</span></div>
+        <div class="resumen-card resumen-card--live"><span class="resumen-value">{{ r.partidos.en_vivo }}</span><span class="resumen-label">En vivo</span></div>
+        <div class="resumen-card"><span class="resumen-value">{{ r.partidos.apuestas_abiertas }}</span><span class="resumen-label">Apuestas abiertas</span></div>
+        <div class="resumen-card"><span class="resumen-value">{{ r.partidos.finalizados }}</span><span class="resumen-label">Finalizados</span></div>
+      </section>
+    }
+
+    <!-- ── v2.1: Distribución de apuestas (mini-modal) ──────────────────── -->
+    @if (statsDe(); as sp) {
+      <div class="stats-overlay" (click)="cerrarStats()">
+        <div class="stats-modal" (click)="$event.stopPropagation()">
+          <header class="stats-modal__header">
+            <h3>📊 {{ sp.equipo_local }} vs {{ sp.equipo_visitante }}</h3>
+            <button class="sidebar-close" (click)="cerrarStats()">✕</button>
+          </header>
+          @if (statsPartido(); as st) {
+            @if (st.total > 0) {
+              <div class="stats-modal__body">
+                <div class="prob-row">
+                  <span>Local ({{ st.local }})</span>
+                  <div class="prob-track"><div class="prob-fill prob-fill--local" [style.width.%]="st.pct_local"></div></div>
+                  <strong>{{ st.pct_local }}%</strong>
+                </div>
+                <div class="prob-row">
+                  <span>Empate ({{ st.empate }})</span>
+                  <div class="prob-track"><div class="prob-fill prob-fill--empate" [style.width.%]="st.pct_empate"></div></div>
+                  <strong>{{ st.pct_empate }}%</strong>
+                </div>
+                <div class="prob-row">
+                  <span>Visitante ({{ st.visitante }})</span>
+                  <div class="prob-track"><div class="prob-fill prob-fill--visitante" [style.width.%]="st.pct_visitante"></div></div>
+                  <strong>{{ st.pct_visitante }}%</strong>
+                </div>
+                <p class="stats-modal__meta">{{ st.total }} predicciones · marcador promedio {{ st.avg_local }}–{{ st.avg_visitante }}</p>
+              </div>
+            } @else {
+              <p class="stats-modal__meta">Este partido aún no tiene predicciones.</p>
+            }
+          } @else {
+            <p class="stats-modal__meta">Cargando...</p>
+          }
+        </div>
+      </div>
+    }
+
     <!-- ── Agregar partido ───────────────────────────────────────────── -->
     <section class="admin-section">
       <header class="section-header">
@@ -157,6 +207,14 @@
           }
         </h2>
         <div class="section-header__right">
+          <input class="table-search" type="text" placeholder="🔍 Buscar equipo o ID..."
+                 [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
+          <button class="btn-cerrar-todas"
+                  [class.confirming]="confirmCerrarTodas()"
+                  [disabled]="cerrandoTodas()"
+                  (click)="cerrarTodas()">
+            {{ cerrandoTodas() ? 'Cerrando...' : confirmCerrarTodas() ? '¿Confirmar cierre total?' : '🔒 Cerrar todas' }}
+          </button>
           <button class="btn-filter" (click)="showAll.update(v => !v)">
             @if (showAll()) { Ocultar cerrados }
             @else { Ver todos <span class="hidden-badge">{{ hiddenCount() }} ocultos</span> }
@@ -179,6 +237,7 @@
               <th>Estado</th>
               <th>Marcador MT</th>
               <th>Apuestas</th>
+              <th>Penales</th>
               <th>Visible</th>
               <th>Acciones</th>
             </tr>
@@ -225,6 +284,18 @@
                   </span>
                 </td>
 
+                <td class="penales-col">
+                  <button class="btn-penales"
+                          [class.on]="partido.penales_habilitados"
+                          [disabled]="togglingPenales() === partido.id || partido.estado === 'finalizado'"
+                          (click)="togglePenales(partido.id)"
+                          [title]="partido.penales_habilitados ? 'Penales habilitados · clic para deshabilitar' : 'Habilitar tanda de penales'">
+                    @if (togglingPenales() === partido.id) { ... }
+                    @else if (partido.penales_habilitados) { 🥅 {{ partido.penales_local ?? 0 }}–{{ partido.penales_visitante ?? 0 }} }
+                    @else { 🥅 OFF }
+                  </button>
+                </td>
+
                 <td class="vis-col">
                   <button class="btn-vis"
                           [class.hidden-state]="!partido.visible_usuarios"
@@ -247,6 +318,7 @@
                 </td>
 
                 <td class="actions-col">
+                  <button class="btn-stats-row" title="Ver distribución de apuestas" (click)="verStats(partido)">📊</button>
                   @if (partido.estado !== 'finalizado') {
                     <button class="btn-result" (click)="openResultado(partido)">🏁 Resultado</button>
                   } @else {

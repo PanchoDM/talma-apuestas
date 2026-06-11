@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { Partido } from '../models/models';
+import { Partido, PartidoStats, ResumenAdmin } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
 export class PartidosService {
@@ -35,6 +35,26 @@ export class PartidosService {
 
   marcadorEnVivo(id: number, data: { goles_local_mt: number; goles_visitante_mt: number }) {
     return this.http.put<{ message: string; partido_id: number }>(`${this.url}/${id}/marcador-en-vivo`, data);
+  }
+
+  getStats(id: number) {
+    return this.http.get<PartidoStats>(`${this.url}/${id}/stats`);
+  }
+
+  getResumen() {
+    return this.http.get<ResumenAdmin>(`${this.url}/resumen`);
+  }
+
+  togglePenales(id: number) {
+    return this.http.patch<{ id: number; penales_habilitados: boolean }>(`${this.url}/${id}/toggle-penales`, {});
+  }
+
+  actualizarPenales(id: number, data: { penales_local: number; penales_visitante: number }) {
+    return this.http.put<{ message: string; partido_id: number }>(`${this.url}/${id}/penales`, data);
+  }
+
+  cerrarTodas() {
+    return this.http.patch<{ cerrados: number }>(`${this.url}/cerrar-todas`, {});
   }
 
   setVisibilidadFase(tipo: 'grupo' | 'ronda', valor: string, visible: boolean) {

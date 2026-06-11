@@ -36,7 +36,6 @@
       @if (liveSuccess) {
         <div class="rm-live-success">{{ liveSuccess }}</div>
       }
-
       <div class="rm-alert rm-alert--warning">
         El botón amarillo cierra el partido <strong>definitivamente</strong> y reparte los puntos.
         El botón azul solo guarda el marcador de forma temporal.
@@ -62,5 +61,32 @@
       </div>
 
     </form>
+
+    <!-- 🥅 Panel de tanda de penales (solo si el admin la habilitó en la tabla) -->
+    @if (partido.penales_habilitados) {
+      <div class="rm-penales" [formGroup]="formPenales">
+        <p class="rm-penales__title">🥅 Tanda de penales en vivo</p>
+        <div class="rm-scores rm-scores--penales">
+          <div class="rm-score-input">
+            <label>{{ partido.equipo_local }}</label>
+            <input formControlName="penales_local" type="number" min="0" max="20" />
+          </div>
+          <span class="rm-dash">–</span>
+          <div class="rm-score-input">
+            <label>{{ partido.equipo_visitante }}</label>
+            <input formControlName="penales_visitante" type="number" min="0" max="20" />
+          </div>
+        </div>
+        @if (penalesSuccess) {
+          <div class="rm-live-success">{{ penalesSuccess }}</div>
+        }
+        <button type="button" class="btn-penales-update"
+                [disabled]="savingPenales || formPenales.invalid"
+                (click)="submitPenales()">
+          {{ savingPenales ? 'Actualizando...' : '🥅 Actualizar Penales en Vivo' }}
+        </button>
+      </div>
+    }
+
   </div>
 </div>

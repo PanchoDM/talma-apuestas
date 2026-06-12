@@ -159,6 +159,8 @@
                 @if (statsAbiertas().has(partido.id)) {
                   @if (statsLoading() === partido.id) {
                     <p class="stats-loading">Cargando...</p>
+                  } @else if (statsError().has(partido.id)) {
+                    <p class="prob-meta">No se pudieron cargar las probabilidades. Intenta de nuevo.</p>
                   } @else if (getStats(partido.id); as st) {
                     @if (st.total > 0) {
                       <div class="prob-panel">

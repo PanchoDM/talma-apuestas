@@ -38,6 +38,7 @@ export class DashboardComponent implements OnInit {
   stats         = signal<Map<number, PartidoStats>>(new Map());
   statsAbiertas = signal<Set<number>>(new Set());
   statsLoading  = signal<number | null>(null);
+  statsError    = signal<Set<number>>(new Set());
 
   // ── Filtros y búsqueda ────────────────────────────────────────────────────
   busqueda    = signal('');
@@ -211,13 +212,17 @@ export class DashboardComponent implements OnInit {
       return;
     }
     this.statsAbiertas.update(s => new Set(s).add(partido.id));
+    this.statsError.update(s => { const n = new Set(s); n.delete(partido.id); return n; });
     this.statsLoading.set(partido.id);
     this.partidosSvc.getStats(partido.id).subscribe({
       next: st => {
         this.stats.update(m => new Map(m).set(partido.id, st));
         this.statsLoading.set(null);
       },
-      error: () => this.statsLoading.set(null),
+      error: () => {
+        this.statsLoading.set(null);
+        this.statsError.update(s => new Set(s).add(partido.id));
+      },
     });
   }
 
